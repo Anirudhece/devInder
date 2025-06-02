@@ -3,7 +3,7 @@ import { connectDB } from "./config/database.js";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.js";
 import profileRouter from "./routes/profile.js";
-// import requestsRouter from "./routes/request.js";
+import connectionRequestRouter from "./routes/request.js";
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
-// app.use("/", requestsRouter);
+app.use("/", connectionRequestRouter);
 
 connectDB()
   .then(() => {
