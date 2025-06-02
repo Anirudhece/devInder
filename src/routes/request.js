@@ -61,4 +61,48 @@ connectionRequestRouter.post(
   }
 );
 
+connectionRequestRouter.post(
+  "/request/review/:status/:toUserId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUSer = req.user;
+      const toUserId = req.params.toUserId;
+      const status = req.params.status;
+
+      if (!toUserId || !status)
+        throw new Error("invalid data, missing fields.");
+
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status))
+        throw new Error(`${status} is not a valid status.`);
+
+      const _connectionRequest = await ConnectionRequest.findOne({
+        _id: req.body.connectionRequestId,
+        toUserId: loggedInUSer._id,
+        status: "interested",
+      });
+
+      if (!_connectionRequest) throw new Error("connection request not found");
+
+      _connectionRequest.status = status;
+
+      const data = await _connectionRequest.save();
+
+      if (!data) throw new Error("connection request not saved");
+
+      res.status(200).send({
+        message: "connection request saved successfully",
+        data,
+      });
+    } catch (err) {
+      res.status(400).send({
+        message: "error happened inside connection request",
+        error: err.message,
+      });
+    }
+    const user = req.user;
+  }
+);
+
 export default connectionRequestRouter;
