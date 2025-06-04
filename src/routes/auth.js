@@ -64,7 +64,7 @@ authRouter.get("/signin", async (req, res) => {
   } catch (error) {
     res
       .status(400)
-      .send({ err: "something went wrong while signing uo", msg: error });
+      .send({ err: "something went wrong while signing uo", msg: error.message });
   }
 });
 
