@@ -70,6 +70,13 @@ UserRouter.get("/user/connection", userAuth, async (req, res) => {
 UserRouter.get("/users/feed", userAuth, async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
+
+    const page = parseInt(req?.query?.page) || 1;
+    let limit = parseInt(req?.query?.limit) || 10;
+    limit = Math.min(limit, 50);
+
+    const skip = (page - 1) * limit;
+
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUserId }, { toUserId: loggedInUserId }],
     }).select(["fromUserId", "toUserId"]);
@@ -84,10 +91,9 @@ UserRouter.get("/users/feed", userAuth, async (req, res) => {
 
     const users = await User.find({
       _id: { $nin: [...hideUsersFromFeed] },
-    }).select(SAFE_DATA);
+    }).select(SAFE_DATA).skip(skip).limit(limit);
 
-    res.status(200).send({message: "Users fetched successfully",users});
-
+    res.status(200).send({ message: "Users fetched successfully", users });
   } catch (error) {
     res.status(400).send({
       message: "error happened inside connection request",
