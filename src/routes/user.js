@@ -1,6 +1,7 @@
 import express from "express";
 import { userAuth } from "../middlewares/auth.js";
 import ConnectionRequest from "../models/ConnectionRequest.js";
+import User from "../models/User.js";
 
 const UserRouter = express.Router();
 const SAFE_DATA = [
@@ -58,6 +59,35 @@ UserRouter.get("/user/connection", userAuth, async (req, res) => {
       message: "Connection requests fetched successfully",
       requests: filteredData,
     });
+  } catch (error) {
+    res.status(400).send({
+      message: "error happened inside connection request",
+      error: error.message,
+    });
+  }
+});
+
+UserRouter.get("/users/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUserId = req.user._id;
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUserId }, { toUserId: loggedInUserId }],
+    }).select(["fromUserId", "toUserId"]);
+
+    const hideUsersFromFeed = new Set();
+    connectionRequests.forEach((ele) => {
+      hideUsersFromFeed.add(ele.fromUserId.toString());
+      hideUsersFromFeed.add(ele.toUserId.toString());
+    });
+
+    hideUsersFromFeed.add(loggedInUserId.toString());
+
+    const users = await User.find({
+      _id: { $nin: [...hideUsersFromFeed] },
+    }).select(SAFE_DATA);
+
+    res.status(200).send({message: "Users fetched successfully",users});
+
   } catch (error) {
     res.status(400).send({
       message: "error happened inside connection request",
