@@ -60,11 +60,17 @@ authRouter.get("/signin", async (req, res) => {
 
     const token = jwt.sign({ _id: user._id }, "Learning@Anii69");
 
-    res.status(200).cookie("token", token).send("User logged in successfully");
+    res
+      .status(200)
+      .cookie("token", token)
+      .send({ msg: "User logged in successfully", user });
   } catch (error) {
     res
       .status(400)
-      .send({ err: "something went wrong while signing uo", msg: error.message });
+      .send({
+        err: "something went wrong while signing uo",
+        msg: error.message,
+      });
   }
 });
 

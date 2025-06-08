@@ -5,9 +5,11 @@ import authRouter from "./routes/auth.js";
 import profileRouter from "./routes/profile.js";
 import connectionRequestRouter from "./routes/request.js";
 import UserRouter from "./routes/user.js";
+import cors from "cors";
 
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 app.use(cookieParser());
 
