@@ -37,7 +37,7 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-authRouter.get("/signin", async (req, res) => {
+authRouter.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
     const isValidEmail = validator.isEmail(email);
@@ -68,7 +68,7 @@ authRouter.get("/signin", async (req, res) => {
     res
       .status(400)
       .send({
-        err: "something went wrong while signing uo",
+        err: "something went wrong while signing in.",
         msg: error.message,
       });
   }
