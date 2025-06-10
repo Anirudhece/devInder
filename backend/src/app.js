@@ -5,8 +5,14 @@ import authRouter from "./routes/auth.js";
 import profileRouter from "./routes/profile.js";
 import connectionRequestRouter from "./routes/request.js";
 import UserRouter from "./routes/user.js";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors({
+  origin:'https://3000-firebase-devinder-1747476670920.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev',
+  credentials:true
+}));
 
 app.use(express.json());
 app.use(cookieParser());
