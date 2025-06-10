@@ -9,7 +9,11 @@ import cors from "cors";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin:'https://3000-firebase-devinder-1747476670920.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev',
+  credentials:true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 

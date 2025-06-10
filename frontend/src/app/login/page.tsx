@@ -92,7 +92,10 @@ export default function Login() {
 
   const handleLogin =async  (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await callLoginApi(emailId,password);
+    const loginData = await callLoginApi(emailId,password);
+    if(!loginData?.user){
+      return;
+    }
   };
 
   return (
