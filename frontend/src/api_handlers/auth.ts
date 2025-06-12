@@ -25,7 +25,7 @@ const callLoginApi = async (
 ): Promise<LoginDataInterface | undefined> => {
   try {
     const endPoint = `${process.env.NEXT_PUBLIC_BACKENDHOST}/signin`;
-    const response = await axios.post<LoginDataInterface>(
+    const response = await axios.post(
       endPoint,
       { email: username, password },
       { headers: HEADERS, withCredentials: true }

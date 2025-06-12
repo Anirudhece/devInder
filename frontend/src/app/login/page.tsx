@@ -1,10 +1,13 @@
 "use client";
 import callLoginApi from "@/api_handlers/auth";
+import { addUser } from "@/lib/features/users/userSlice";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 
 export default function Login() {
   const [emailId, setEmailId] = useState("");
   const [password, setpassword] = useState("");
+  const dispatch = useDispatch();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmailId(e.target.value);
@@ -90,12 +93,13 @@ export default function Login() {
     );
   };
 
-  const handleLogin =async  (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const loginData = await callLoginApi(emailId,password);
-    if(!loginData?.user){
+    const loginData = await callLoginApi(emailId, password);
+    if (!loginData?.user) {
       return;
     }
+    dispatch(addUser(loginData?.user));
   };
 
   return (
