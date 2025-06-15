@@ -1,18 +1,7 @@
 import axios from "axios";
 import { HEADERS } from "../utils/getHeader";
-
-// Interfaces
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  age: number;
-  gender: string;
-  __v: number;
-  skills: any[];
-}
+import { User } from "@/types/userTypes";
+import { BASE_URL } from "@/utils/constants";
 
 interface LoginDataInterface {
   msg: string;
@@ -24,7 +13,7 @@ const callLoginApi = async (
   password: string
 ): Promise<LoginDataInterface | undefined> => {
   try {
-    const endPoint = `${process.env.NEXT_PUBLIC_BACKENDHOST}/signin`;
+    const endPoint = `${BASE_URL}/signin`;
     const response = await axios.post(
       endPoint,
       { email: username, password },
