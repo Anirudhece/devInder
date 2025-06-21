@@ -3,14 +3,15 @@ import callLoginApi from "@/api_handlers/auth";
 import { addUser } from "@/lib/features/users/userSlice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [emailId, setEmailId] = useState("");
   const [password, setpassword] = useState("");
-  const dispatch = useDispatch();
-  const router= useRouter();
+  const [loginError, setLoginError] = useState("");
 
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmailId(e.target.value);
@@ -103,10 +104,22 @@ export default function Login() {
     e.preventDefault();
     const loginData = await callLoginApi(emailId, password);
     if (!loginData?.user) {
+      setLoginError(loginData?.err ?? "");
       return;
     }
     dispatch(addUser(loginData?.user));
-    router.push('/');
+    router.push("/");
+  };
+
+  const renderLoginError = () => {
+    if(!loginError){
+      return null;
+    }
+    return (
+      <div role="alert" className="alert alert-error alert-soft">
+        <span>{loginError}</span>
+      </div>
+    );
   };
 
   return (
@@ -118,6 +131,7 @@ export default function Login() {
             <form onSubmit={handleLogin}>
               {emailField()}
               {passwordField()}
+              {renderLoginError()}
               <div className="card-actions justify-center">
                 <button type="submit" className="btn w-1/2 btn-primary mt-2">
                   Log In

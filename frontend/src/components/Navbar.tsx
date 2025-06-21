@@ -1,14 +1,23 @@
 "use client";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { User } from "@/types/userTypes";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { callLogoutApi } from "@/api_handlers/auth";
+import { removeUser } from "@/lib/features/users/userSlice";
 
 const Navbar = () => {
-  const user: User = useSelector((store: RootState) => store.user);
+  const user: User | any = useSelector((store: RootState) => store.user);
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    await callLogoutApi();
+    dispatch(removeUser());
+    router.push("/login");
+  };
 
   return (
     <div className="navbar bg-base-300 shadow-sm">
@@ -46,7 +55,7 @@ const Navbar = () => {
               <Link href="/settings">Settings</Link>
             </li>
             <li>
-              <Link href="/logout">Logout</Link>
+              <span onClick={handleLogout}>Logout</span>
             </li>
           </ul>
         </div>
