@@ -1,5 +1,5 @@
 "use client";
-import { fetchUser } from "@/api_handlers/auth";
+import { fetchUser } from "@/api_handlers/user";
 import { addUser } from "@/lib/features/users/userSlice";
 import { RootState } from "@/lib/store";
 import { useRouter } from "next/navigation";
