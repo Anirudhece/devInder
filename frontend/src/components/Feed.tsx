@@ -7,6 +7,7 @@ import { RootState } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import UserCard from "./ui/user-card";
 
 const Feed = () => {
   const dispatch = useDispatch();
@@ -45,42 +46,10 @@ const Feed = () => {
     dispatch(addfeed(data?.users));
   };
 
-  const userCard = (feed: any) => {
-    const { firstName, lastName, photoUrl, age, gender, about } = feed;
-    return (
-      <div className="flex justify-center my-10">
-        <div className="card bg-base-300 w-96 shadow-lg">
-          <figure>
-            <img
-              src={
-                photoUrl ||
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd6fmlVq4miD1EDbbneFGhfZmqOKEODX5mwk14WnkqBoBcsclU99QVhpTGri8wpY1Mc-M&usqp=CAU"
-              }
-              alt="profileImage"
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">
-              {firstName} {lastName}
-            </h2>
-            <span>
-              {age} {gender}
-            </span>
-            <p>{about}</p>
-            <div className="card-actions justify-between mt-4">
-              <button className="btn btn-primary">Ignore</button>{" "}
-              <button className="btn btn-secondary ">Interested</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       {/* <div className="flex justify-center my-10"> */}
-      {feedData && userCard(feedData[0])}
+      {feedData && <UserCard feed={feedData[0]} />}
       {/* </div>{" "} */}
     </>
   );

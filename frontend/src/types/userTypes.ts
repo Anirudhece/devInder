@@ -9,4 +9,5 @@ export interface User {
   __v: number;
   skills: any[];
   photoUrl: String;
+  about: String;
 }
