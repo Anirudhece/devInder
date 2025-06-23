@@ -3,6 +3,7 @@ import { userAuth } from "../middlewares/auth.js";
 import { validateProfileEditData } from "../utils/validation.js";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import { SAFE_DATA } from "../utils/constants.js";
 
 const profileRouter = express.Router();
 
@@ -24,8 +25,10 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 
     const logedInUser = req.user;
 
-    Object.keys(req.body).forEach((key) => {
-      logedInUser[key] = req.body[key];
+    SAFE_DATA.forEach((key) => {
+      if (req.body[key] !== undefined) {
+        logedInUser[key] = req.body[key];
+      }
     });
 
     await logedInUser.save();

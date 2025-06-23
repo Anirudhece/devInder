@@ -2,17 +2,9 @@ import express from "express";
 import { userAuth } from "../middlewares/auth.js";
 import ConnectionRequest from "../models/ConnectionRequest.js";
 import User from "../models/User.js";
+import { SAFE_DATA } from "../utils/constants.js";
 
 const UserRouter = express.Router();
-const SAFE_DATA = [
-  "firstName",
-  "age",
-  "lastName",
-  "photoUrl",
-  "gender",
-  "about",
-  "skills",
-];
 
 //get all the pending connection requests for loggedIn user
 UserRouter.get("/user/request/recieved", userAuth, async (req, res) => {

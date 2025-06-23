@@ -1,14 +1,17 @@
 "use client";
+import { profileEdit } from "@/api_handlers/profile";
 import UserCard from "@/components/ui/user-card";
+import { addUser } from "@/lib/features/users/userSlice";
 import { RootState } from "@/lib/store";
 import { User } from "@/types/userTypes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Profile() {
   const router = useRouter();
   const userData: User = useSelector((store: RootState) => store.user);
+  const dispatch = useDispatch();
 
   const [firstName, setFirstName] = useState(userData?.firstName || "");
   const [lastName, setLastName] = useState(userData?.lastName || "");
@@ -18,16 +21,26 @@ export default function Profile() {
   );
   const [about, setAbout] = useState(userData?.about || "");
   const [photoUrl, setPhotoUrl] = useState(userData?.photoUrl || "");
+  const [apiError, setApiError] = useState("");
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    console.log({
+    const updatedInfo = {
       firstName,
       lastName,
-      age,
+      age: String(age),
+      photoUrl,
       gender,
       about,
-    });
+    };
+
+    const updatedUserData = await profileEdit(updatedInfo);
+    if (!updatedUserData) {
+      setApiError(true);
+      return;
+    }
+    dispatch(addUser(updatedUserData));
+    router.push("/");
   };
 
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,10 +68,6 @@ export default function Profile() {
   };
 
   const renderForm = () => {
-    // if (!userData) {
-    //   router.push("/login");
-    //   return null;
-    // }
     return (
       <div className="card bg-base-300 w-120 shadow-sm">
         <div className="card-body">
@@ -119,9 +128,9 @@ export default function Profile() {
                 className="select w-full validator"
               >
                 <option disabled={true}>Select your gender</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
+                <option>male</option>
+                <option>female</option>
+                <option>others</option>
               </select>
             </div>
 
@@ -134,6 +143,25 @@ export default function Profile() {
                 onChange={handleAboutChange}
               />
             </div>
+
+            {apiError && (
+              <div role="alert" className="alert alert-error">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>Something went wrong.</span>
+              </div>
+            )}
 
             <div className="card-actions justify-center">
               <button type="submit" className="btn w-1/2 btn-primary mt-2">
