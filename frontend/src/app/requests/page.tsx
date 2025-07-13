@@ -1,6 +1,7 @@
 "use client";
+import { callRequestReviewApi } from "@/api_handlers/request";
 import { callGetRequestRecievedApi } from "@/api_handlers/users";
-import { addRequests } from "@/lib/features/request/requestSlice";
+import { addRequests, removeRequest } from "@/lib/features/request/requestSlice";
 import { RootState } from "@/lib/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +29,16 @@ export default function Requests() {
     };
     getRequests();
   }, []);
+
+  const handleRequest = async (
+    status: string,
+    toUserId: string,
+    connectionRequestId: string
+  ) => {
+    await callRequestReviewApi(status, toUserId, connectionRequestId);
+    dispatch(removeRequest(connectionRequestId));
+    return;
+  };
 
   const renderConnections = () => {
     if (!requests) {
@@ -63,8 +74,22 @@ export default function Requests() {
             </div>
           </div>
           <div className="flex space-x-3">
-            <button className="btn btn-primary">Accept</button>
-            <button className="btn btn-secondary">Reject</button>
+            <button
+              onClick={() =>
+                handleRequest("accepted", request?.toUserId, request?._id)
+              }
+              className="btn btn-primary"
+            >
+              Accept
+            </button>
+            <button
+              onClick={() =>
+                handleRequest("rejected", request?.toUserId, request?._id)
+              }
+              className="btn btn-secondary"
+            >
+              Reject
+            </button>
           </div>
         </div>
       );
