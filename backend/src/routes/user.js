@@ -16,11 +16,13 @@ UserRouter.get("/user/request/recieved", userAuth, async (req, res) => {
     }).populate("fromUserId", SAFE_DATA);
 
     res.status(200).send({
+      success: true,
       message: "Pending connection requests fetched successfully",
       requests: pendingConnectionRequests,
     });
   } catch (error) {
     res.status(400).send({
+      success: false,
       message: "error happened inside connection request",
       error: error.message,
     });
@@ -50,11 +52,13 @@ UserRouter.get("/user/connection", userAuth, async (req, res) => {
     res.status(200).send({
       message: "Connection requests fetched successfully",
       requests: filteredData,
+      success: true,
     });
   } catch (error) {
     res.status(400).send({
       message: "error happened inside connection request",
       error: error.message,
+      success: false
     });
   }
 });
@@ -83,7 +87,10 @@ UserRouter.get("/user/feed", userAuth, async (req, res) => {
 
     const users = await User.find({
       _id: { $nin: [...hideUsersFromFeed] },
-    }).select(SAFE_DATA).skip(skip).limit(limit);
+    })
+      .select(SAFE_DATA)
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).send({ message: "Users fetched successfully", users });
   } catch (error) {

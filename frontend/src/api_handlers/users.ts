@@ -11,11 +11,11 @@ export const callFeedApi = async () => {
     });
     return response.data;
   } catch (error) {
-    console.log(`Error in callFeed: `,error);
+    console.log(`Error in callFeed: `, error);
   }
 };
 
-export const callUserConnection = async ()=>{
+export const callUserConnection = async () => {
   try {
     const endPoint = `${BASE_URL}/user/connection`;
     const response = await axios.get(endPoint, {
@@ -24,6 +24,19 @@ export const callUserConnection = async ()=>{
     });
     return response.data;
   } catch (error) {
-    console.log(`Error in callFeed: `,error);
+    console.log(`Error in callFeed: `, error);
   }
-}
+};
+
+export const callGetRequestRecievedApi = async () => {
+  try {
+    const endPoint = `${BASE_URL}/user/request/recieved`;
+    const response = await axios.get(endPoint, {
+      headers: HEADERS,
+      withCredentials: true,
+    });
+    return response?.data;
+  } catch (error) {
+    console.log(`Error in callFeed: `, error);
+  }
+};
