@@ -46,10 +46,20 @@ const Feed = () => {
     dispatch(addfeed(data?.users));
   };
 
+  const renderUsers = () => {
+    if (!feedData?.length) {
+      return null;
+    }
+    return feedData.map((user, ind: number) => (
+      <UserCard key={ind} feed={user} />
+    ));
+  };
+
   return (
     <>
       <div className="flex justify-center my-10">
-        {feedData && <UserCard feed={feedData[0]} />}
+        {/* {feedData && <UserCard feed={feedData[0]} />} */}
+        <div className="space-y-4">{renderUsers()}</div>
       </div>
     </>
   );

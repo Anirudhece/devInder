@@ -59,7 +59,7 @@ UserRouter.get("/user/connection", userAuth, async (req, res) => {
   }
 });
 
-UserRouter.get("/users/feed", userAuth, async (req, res) => {
+UserRouter.get("/user/feed", userAuth, async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
 
