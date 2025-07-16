@@ -58,7 +58,6 @@ const Feed = () => {
   return (
     <>
       <div className="flex justify-center my-10">
-        {/* {feedData && <UserCard feed={feedData[0]} />} */}
         <div className="space-y-4">{renderUsers()}</div>
       </div>
     </>

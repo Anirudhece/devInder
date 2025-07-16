@@ -50,11 +50,13 @@ connectionRequestRouter.post(
       res.status(200).send({
         message: "connection request sent successfully",
         data,
+        success:true,
       });
     } catch (err) {
       res.status(400).send({
         message: "error happened inside connection request",
         error: err.message,
+        success:false,
       });
     }
     const user = req.user;
@@ -94,11 +96,13 @@ connectionRequestRouter.post(
       res.status(200).send({
         message: "connection request saved successfully",
         data,
+        success:true,
       });
     } catch (err) {
       res.status(400).send({
         message: "error happened inside connection request",
         error: err.message,
+        success:false,
       });
     }
     const user = req.user;
