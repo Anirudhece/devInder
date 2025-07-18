@@ -1,5 +1,5 @@
 "use client";
-import callLoginApi from "@/api_handlers/auth";
+import callLoginApi, { callSignUpApi } from "@/api_handlers/auth";
 import { addUser } from "@/lib/features/users/userSlice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,10 @@ export default function Login() {
   const [password, setpassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLoginForm, setIsLoginForm] = useState(false);
+
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -19,6 +23,54 @@ export default function Login() {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setpassword(e.target.value);
+  };
+
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFirstName(e.target.value);
+  };
+
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLastName(e.target.value);
+  };
+
+  const renderFirstName = () => {
+    if (isLoginForm) {
+      return null;
+    }
+    return (
+      <>
+        <label className="input validator w-full my-2">
+          <input
+            value={firstName}
+            onChange={handleFirstNameChange}
+            required
+            type="text"
+            placeholder="First name"
+          />
+        </label>
+        <div className="validator-hint hidden">First Name</div>
+      </>
+    );
+  };
+
+  const renderLastName = () => {
+    if (isLoginForm) {
+      return null;
+    }
+    return (
+      <>
+        <label className="input validator w-full my-2">
+          <input
+            value={lastName}
+            onChange={handleLastNameChange}
+            required
+            type="text"
+            placeholder="Last name"
+          />
+        </label>
+        <div className="validator-hint hidden">Last Name</div>
+      </>
+    );
   };
 
   const emailField = () => {
@@ -97,22 +149,47 @@ export default function Login() {
     );
   };
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    if (!emailId || !password) {
-      return;
-    }
+  const handleLoginOrSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLogin = async () => {
+      if (!emailId || !password) {
+        return;
+      }
+      const loginData = await callLoginApi(emailId, password);
+      if (!loginData?.user) {
+        setLoginError(loginData?.err ?? "");
+        return;
+      }
+      dispatch(addUser(loginData?.user));
+      router.push("/");
+    };
+
+    const handleSingUp = async () => {
+      if (!emailId || !password || !firstName || !lastName) {
+        return;
+      }
+      const signUpData = await callSignUpApi(
+        emailId,
+        password,
+        firstName,
+        lastName
+      );
+
+      console.log(`signUpData : `,signUpData)
+      dispatch(addUser(signUpData?.data));
+      router.push("/profile");
+    };
+
     e.preventDefault();
-    const loginData = await callLoginApi(emailId, password);
-    if (!loginData?.user) {
-      setLoginError(loginData?.err ?? "");
-      return;
+
+    if (isLoginForm) {
+      await handleLogin();
+    } else {
+      await handleSingUp();
     }
-    dispatch(addUser(loginData?.user));
-    router.push("/");
   };
 
   const renderLoginError = () => {
-    if(!loginError){
+    if (!loginError) {
       return null;
     }
     return (
@@ -122,21 +199,56 @@ export default function Login() {
     );
   };
 
+  const renderLoginButton = () => {
+    if (!isLoginForm) {
+      return;
+    }
+    return (
+      <button type="submit" className="btn w-1/2 btn-primary mt-2">
+        Log In
+      </button>
+    );
+  };
+
+  const renderSignUpButton = () => {
+    if (isLoginForm) {
+      return;
+    }
+    return (
+      <button type="submit" className="btn w-1/2 btn-primary mt-2">
+        Sign Up
+      </button>
+    );
+  };
+
   return (
     <>
       <div className="flex justify-center my-10">
         <div className="card bg-base-300 w-120 shadow-sm">
           <div className="card-body">
-            <h2 className="card-title flex justify-center mb-2">Login</h2>
-            <form onSubmit={handleLogin}>
+            <h2 className="card-title flex justify-center mb-2">
+              {isLoginForm ? "Login" : "Sign Up"}
+            </h2>
+            <form onSubmit={handleLoginOrSignUp}>
+              {renderFirstName()}
+              {renderLastName()}
               {emailField()}
               {passwordField()}
               {renderLoginError()}
               <div className="card-actions justify-center">
-                <button type="submit" className="btn w-1/2 btn-primary mt-2">
-                  Log In
-                </button>
+                {renderLoginButton()}
+                {renderSignUpButton()}
               </div>
+              <p
+                onClick={() => {
+                  setIsLoginForm((prev) => !prev);
+                }}
+                className="mt-8 decoration-sky-500 cursor-pointer"
+              >
+                {isLoginForm
+                  ? "New User? SignUp here."
+                  : "Existing User? SignIn here."}
+              </p>
             </form>
           </div>
         </div>

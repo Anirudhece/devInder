@@ -25,15 +25,23 @@ authRouter.post("/signup", async (req, res) => {
       lastName,
       email,
       password: hashedPassword,
-      age,
-      gender,
+      // age,
+      // gender,
     });
 
-    await user.save();
+    const savedUser = await user.save();
+    const token = jwt.sign({ _id: savedUser._id }, "Learning@Anii69");
+    delete savedUser.password
 
-    res.status(200).send("User created successfully");
+    res.status(200).cookie("token", token).send({
+      message: "User created successfully",
+      success: true,
+      data: savedUser,
+    });
   } catch (error) {
-    res.status(400).send({ err: "User cannot be created", msg: error });
+    res
+      .status(400)
+      .send({ success: false, err: "User cannot be created", message: error });
   }
 });
 
@@ -65,12 +73,10 @@ authRouter.post("/signin", async (req, res) => {
       .cookie("token", token)
       .send({ msg: "User logged in successfully", user });
   } catch (error) {
-    res
-      .status(400)
-      .send({
-        err: "something went wrong while signing in.",
-        msg: error.message,
-      });
+    res.status(400).send({
+      err: "something went wrong while signing in.",
+      msg: error.message,
+    });
   }
 });
 

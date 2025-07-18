@@ -24,10 +24,11 @@ const callLoginApi = async (
   } catch (error: any) {
     console.log(error?.response?.data || error.message);
     return {
-      msg: undefined, 
+      msg: undefined,
       user: undefined,
-      err: error?.response?.data?.msg ?? 'Something went wrong',
-    };}
+      err: error?.response?.data?.msg ?? "Something went wrong",
+    };
+  }
 };
 
 const callLogoutApi = async () => {
@@ -42,5 +43,25 @@ const callLogoutApi = async () => {
     console.log(error);
   }
 };
+
+const callSignUpApi = async (
+  username: string,
+  password: string,
+  firstName: string,
+  lastName: string
+) => {
+  try {
+    const endPoint = `${BASE_URL}/signup`;
+    const response = await axios.post(
+      endPoint,
+      { email: username, password, firstName, lastName },
+      { headers: HEADERS, withCredentials: true }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.log(error?.response?.data || error.message);
+  }
+};
+
 export default callLoginApi;
-export { callLogoutApi };
+export { callLogoutApi, callSignUpApi };
