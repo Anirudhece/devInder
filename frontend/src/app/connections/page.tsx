@@ -13,14 +13,13 @@ export default function Connection() {
   useEffect(() => {
     const fetchData = async () => {
       const userConnectionData = await callUserConnection();
-      console.log(`userConnectionData 🥐: `, userConnectionData?.requests);
       dispatch(addConnections(userConnectionData?.requests));
     };
     fetchData();
   }, []);
 
   const renderConnections = () => {
-    if (!connections) {
+    if (!connections || !Array.isArray(connections)) {
       return null;
     }
 
