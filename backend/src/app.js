@@ -6,15 +6,20 @@ import profileRouter from "./routes/profile.js";
 import connectionRequestRouter from "./routes/request.js";
 import UserRouter from "./routes/user.js";
 import cors from "cors";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 const app = express();
 dotenv.config();
 
-app.use(cors({
-  origin:'https://3000-firebase-devinder-1747476670920.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev',
-  credentials:true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://16.171.2.113::3000",
+      "https://3000-firebase-devinder-1747476670920.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
