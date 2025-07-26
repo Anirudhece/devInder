@@ -15,6 +15,7 @@ app.use(
   cors({
     origin: [
       "http://16.171.2.113:3000",
+      "http://16.171.2.113:4000",
       "https://3000-firebase-devinder-1747476670920.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev",
     ],
     credentials: true,
