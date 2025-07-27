@@ -25,10 +25,10 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api", authRouter);
-app.use("/api", profileRouter);
-app.use("/api", connectionRequestRouter);
-app.use("/api", UserRouter);
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", connectionRequestRouter);
+app.use("/", UserRouter);
 
 connectDB()
   .then(() => {
