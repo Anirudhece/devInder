@@ -3,6 +3,7 @@
 import { callUserConnection } from "@/api_handlers/users";
 import { addConnections } from "@/lib/features/connections/connectionSlice";
 import { RootState } from "@/lib/store";
+import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -23,27 +24,32 @@ export default function Connection() {
       return null;
     }
 
-    return connections.map((connection: any, ind: number) => {
-      const { firstName, lastName, photoUrl, age, gender, about } = connection;
+    return connections?.map((connection: any, ind: number) => {
+      const { firstName, lastName, photoUrl, age, gender, about, _id } = connection;
       return (
-        <div className="flex m-3 p-3 rounded-lg bg-base-300" key={ind}>
-          <div>
-            <img
-              className="w-20 h-20 rounded-full"
-              loading="lazy"
-              src={photoUrl}
-            />
-          </div>
-          <div className="text-left mx-4">
-            <h2 className="text-xl font-bold">
-              {firstName} {lastName}
-            </h2>
-            {age && gender && (
-              <h2>
-                {age} , {gender}
+        <div className="flex m-3 p-3 rounded-lg bg-base-300 justify-between items-center" key={ind}>
+          <div className="flex">
+            <div>
+              <img
+                className="w-20 h-20 rounded-full"
+                loading="lazy"
+                src={photoUrl}
+              />
+            </div>
+            <div className="text-left mx-4">
+              <h2 className="text-xl font-bold">
+                {firstName} {lastName}
               </h2>
-            )}
-            {about && <h2>{about}</h2>}
+              {age && gender && (
+                <h2>
+                  {age} , {gender}
+                </h2>
+              )}
+              {about && <h2>{about}</h2>}
+            </div>
+          </div>
+          <div>
+            <Link className="btn btn-primary cursor-pointer" href={`/chat/${_id}`}>Chat</Link>
           </div>
         </div>
       );
