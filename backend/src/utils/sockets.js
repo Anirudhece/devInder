@@ -1,6 +1,11 @@
 // sockets.js
 import { Server } from "socket.io";
 
+const getRoomId = (targetUserId, userId) => {
+  const roomId = [targetUserId, userId].sort().join("_");
+  return roomId;
+};
+
 export const initialiseSocket = (server) => {
   const io = new Server(server, {
     cors: {
@@ -14,14 +19,20 @@ export const initialiseSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("User connected 🍎", socket.id);
+    socket.on("joinChat", ({ targetUserId, userId }) => {
+      const roomId = getRoomId(targetUserId, userId);
+      socket.join(roomId);
+    });
 
-    socket.on("joinChat", (data) => {
-      console.log(`entered joinChat 🌶️`, data);
+    socket.on("sendMessage", ({ firstName, targetUserId, message, userId }) => {
+      const roomId = getRoomId(targetUserId, userId);
+      io.to(roomId).emit("messageRecieved", { firstName, message, userId });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
     });
   });
-
-  
 
   // return io;
 };

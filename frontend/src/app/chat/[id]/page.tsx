@@ -1,167 +1,162 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { createSocketConnection } from "../../../utils/sockets";
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { socket } from "../../../utils/sockets";
 import { useSelector } from "react-redux";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
-const ChatSlug = ({ params }: PageProps) => {
+interface Message {
+  firstName: string;
+  message: string;
+  time: string;
+  isReceived: boolean;
+}
+
+const ChatSlug: React.FC<PageProps> = ({ params }) => {
   const user = useSelector((state: any) => state.user);
-  const socketRef = useRef<any>(null);
+  const targetUserIdRef = useRef<string>("");
+
+  const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const handleMessageReceived = (data: any) => {
+    if (data?.userId === user?._id) return; // ignore own messages
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        firstName: data?.firstName,
+        message: data?.message,
+        time: new Date().toLocaleTimeString(),
+        isReceived: true,
+      },
+    ]);
+  };
+
+  const handleSendMessage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const newMessage: Message = {
+      firstName: user?.firstName || "Anonymous",
+      message: inputText,
+      time: new Date().toLocaleTimeString(),
+      isReceived: false,
+    };
+
+    socket?.emit("sendMessage", {
+      ...newMessage,
+      targetUserId: targetUserIdRef.current,
+      userId: user?._id,
+    });
+
+    setMessages((prev) => [...prev, newMessage]);
+    setInputText("");
+  };
 
   useEffect(() => {
     const loadDetails = async () => {
-      try {
-        const { id: targetUserId } = await params;
-        const socket = createSocketConnection();
-        socketRef.current = socket;
+      const { id: targetUserId } = await params;
+      targetUserIdRef.current = targetUserId;
 
-        console.log(`socket : `, socket);
+      socket.connect();
 
-        const socketJoinChatData = {
-          targetUserId,
-          userId: user?._id,
-        };
+      socket.emit("joinChat", { targetUserId, userId: user?._id });
 
-        socket.emit("joinChat", socketJoinChatData);
-      } catch (error) {
-        console.log(`error inside loadDetails 🍍: `, error);
-      }
+      socket.off("messageRecieved"); // clear old listeners if any
+      socket.on("messageRecieved", handleMessageReceived);
     };
-
     loadDetails();
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current.close(); // ✅ ensures no polling/reconnect
-        console.log("Socket fully closed 🚪");
-      }
+      socket.off("messageRecieved", handleMessageReceived);
+      socket.disconnect();
+      console.log("Socket disconnected 🚪");
     };
-  }, [params, user?._id]);
+  }, []);
 
-  return <>{ renderChatWindow()}</>;
+  const ChatBubble: React.FC<{ msg: Message }> = ({ msg }) => {
+    const isReceived = msg.isReceived;
+    const avatar = user?.photoUrl || "/default-avatar.png";
+
+    if (isReceived) {
+      return (
+        <div className="grid pb-6">
+          <div className="flex gap-2.5 mb-4">
+            <img src={avatar} alt="Sender" className="w-10 h-10 rounded-full" />
+            <div className="grid">
+              <h5 className="text-sm font-semibold pb-1">{msg.firstName}</h5>
+              <div className="w-max grid">
+                <div className="px-3.5 py-2 bg-gray-100 rounded">
+                  <p className="text-gray-900 text-sm">{msg.message}</p>
+                </div>
+                <p className="text-gray-500 text-xs py-1">{msg.time}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex gap-2.5 justify-end pb-6">
+        <div className="grid text-right">
+          <h5 className="text-sm font-semibold pb-1">{msg.firstName}</h5>
+          <div className="w-max grid ml-auto">
+            <div className="px-3.5 py-2 bg-indigo-100 rounded">
+              <p className="text-gray-900 text-sm">{msg.message}</p>
+            </div>
+            <p className="text-gray-500 text-xs py-1">{msg.time}</p>
+          </div>
+        </div>
+        <img src={avatar} alt="You" className="w-10 h-10 rounded-full" />
+      </div>
+    );
+  };
+
+  return (
+    <div className="mt-4 flex justify-center">
+      <div className="border-4 p-3 rounded-2xl w-1/2">
+        <div className="h-[60vh] overflow-y-auto">
+          {messages.map((msg, idx) => (
+            <ChatBubble key={idx} msg={msg} />
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 mt-3 border rounded-3xl px-3 py-2">
+          <input
+            className="flex-grow text-sm focus:outline-none"
+            placeholder="Type a message..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
+          <button
+            onClick={handleSendMessage}
+            className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-full"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="none"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M9.04 6.959L6.54 9.457M6.9 10.072l.134.233c1.276 2.205 1.914 3.307 2.772 3.22.857-.088 1.26-1.296 2.066-3.713l1.156-3.467c.736-2.208 1.104-3.312.522-3.895-.582-.583-1.686-.215-3.894.521L6.187 4.128C3.77 4.934 2.562 5.337 2.475 6.194c-.088.857 1.015 1.495 3.22 2.772l.233.134c.306.177.459.266.583.389.123.124.212.277.389.583z"
+                stroke="white"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="ml-2 text-xs font-semibold">Send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ChatSlug;
-
-
-
-const renderChatWindow = () => {
-  return (
-    <>
-      <div className="mt-4 flex justify-center">
-        <div className="border-4  border-solid p-3 rounded-2xl w-1/2">
-          <div className="h-[70vh]">
-            <div className="grid pb-11">
-              <div className="flex gap-2.5 mb-4">
-                <img
-                  src="https://pagedone.io/asset/uploads/1710412177.png"
-                  alt="Shanay image"
-                  className="w-10 h-11"
-                />
-                <div className="grid">
-                  <h5 className=" text-sm font-semibold leading-snug pb-1">
-                    Shanay cruz
-                  </h5>
-                  <div className="w-max grid">
-                    <div className="px-3.5 py-2 bg-gray-100 rounded justify-start  items-center gap-3 inline-flex">
-                      <h5 className="text-gray-900 text-sm font-normal leading-snug">
-                        Guts, I need a review of work. Are you ready?
-                      </h5>
-                    </div>
-                    <div className="justify-end items-center inline-flex mb-2.5">
-                      <h6 className="text-gray-500 text-xs font-normal leading-4 py-1">
-                        05:14 PM
-                      </h6>
-                    </div>
-                  </div>
-                  <div className="w-max grid">
-                    <div className="px-3.5 py-2 bg-gray-100 rounded justify-start items-center gap-3 inline-flex">
-                      <h5 className="text-gray-900 text-sm font-normal leading-snug">
-                        Let me know
-                      </h5>
-                    </div>
-                    <div className="justify-end items-center inline-flex mb-2.5">
-                      <h6 className="text-gray-500 text-xs font-normal leading-4 py-1">
-                        05:14 PM
-                      </h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2.5 justify-end pb-40">
-              <div className="">
-                <div className="grid mb-2">
-                  <h5 className="text-right text-sm font-semibold leading-snug pb-1">
-                    You
-                  </h5>
-                  <div className="px-3 py-2 bg-indigo-600 rounded">
-                    <h2 className="text-white text-sm font-normal leading-snug">
-                      Yes, let’s see, send your work here
-                    </h2>
-                  </div>
-                  <div className="justify-start items-center inline-flex">
-                    <h3 className="text-gray-500 text-xs font-normal leading-4 py-1">
-                      05:14 PM
-                    </h3>
-                  </div>
-                </div>
-                <div className="justify-center">
-                  <div className="grid w-fit ml-auto">
-                    <div className="px-3 py-2 bg-indigo-600 rounded ">
-                      <h2 className="text-white text-sm font-normal leading-snug">
-                        Anyone on for lunch today
-                      </h2>
-                    </div>
-                    <div className="justify-start items-center inline-flex">
-                      <h3 className="text-gray-500 text-xs font-normal leading-4 py-1">
-                        You
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <img
-                src="https://pagedone.io/asset/uploads/1704091591.png"
-                alt="Hailey image"
-                className="w-10 h-11"
-              />
-            </div>
-          </div>
-          <div className="w-full pl-3 pr-1 py-1 rounded-3xl border border-gray-200 items-center gap-2 inline-flex justify-between">
-            <input
-              className="grow w-full shrink basis-0 text-xs font-medium leading-4 focus:outline-none"
-              placeholder="Type here..."
-            />
-            <button className="btn btn-primary items-center flex px-1 py-1 bg-indigo-600 rounded-full ">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <g id="Send 01">
-                  <path
-                    id="icon"
-                    d="M9.04071 6.959L6.54227 9.45744M6.89902 10.0724L7.03391 10.3054C8.31034 12.5102 8.94855 13.6125 9.80584 13.5252C10.6631 13.4379 11.0659 12.2295 11.8715 9.81261L13.0272 6.34566C13.7631 4.13794 14.1311 3.03408 13.5484 2.45139C12.9657 1.8687 11.8618 2.23666 9.65409 2.97257L6.18714 4.12822C3.77029 4.93383 2.56187 5.33664 2.47454 6.19392C2.38721 7.0512 3.48957 7.68941 5.69431 8.96584L5.92731 9.10074C6.23326 9.27786 6.38623 9.36643 6.50978 9.48998C6.63333 9.61352 6.72189 9.7665 6.89902 10.0724Z"
-                    stroke="white"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </g>
-              </svg>
-              <h3 className="text-white text-xs font-semibold leading-4 px-2">
-                Send
-              </h3>
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
