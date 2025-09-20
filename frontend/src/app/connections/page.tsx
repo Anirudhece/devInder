@@ -3,13 +3,14 @@
 import { callUserConnection } from "@/api_handlers/users";
 import { addConnections } from "@/lib/features/connections/connectionSlice";
 import { RootState } from "@/lib/store";
-import Link from "next/link";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 export default function Connection() {
   const dispatch = useDispatch();
   const connections = useSelector((store: RootState) => store.connections);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,15 +20,23 @@ export default function Connection() {
     fetchData();
   }, []);
 
+  const goToChat = (_id: string, photoUrl: string) => {
+    router.push(`/chat/${_id}?targetPhotoUrl=${encodeURIComponent(photoUrl)}`);
+  };
+
   const renderConnections = () => {
     if (!connections || !Array.isArray(connections)) {
       return null;
     }
 
     return connections?.map((connection: any, ind: number) => {
-      const { firstName, lastName, photoUrl, age, gender, about, _id } = connection;
+      const { firstName, lastName, photoUrl, age, gender, about, _id } =
+        connection;
       return (
-        <div className="flex m-3 p-3 rounded-lg bg-base-300 justify-between items-center" key={ind}>
+        <div
+          className="flex m-3 p-3 rounded-lg bg-base-300 justify-between items-center"
+          key={ind}
+        >
           <div className="flex">
             <div>
               <img
@@ -49,7 +58,12 @@ export default function Connection() {
             </div>
           </div>
           <div>
-            <Link className="btn btn-primary cursor-pointer" href={`/chat/${_id}?targetPhotoUrl=${photoUrl}`}>Chat</Link>
+            <button
+              onClick={() => goToChat(_id, photoUrl)}
+              className="btn btn-primary cursor-pointer"
+            >
+              Chat
+            </button>
           </div>
         </div>
       );
