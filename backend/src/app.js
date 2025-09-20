@@ -7,6 +7,8 @@ import connectionRequestRouter from "./routes/request.js";
 import UserRouter from "./routes/user.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import http from "http";
+import { initialiseSocket } from "./utils/sockets.js";
 
 const app = express();
 dotenv.config();
@@ -30,12 +32,16 @@ app.use("/", profileRouter);
 app.use("/", connectionRequestRouter);
 app.use("/", UserRouter);
 
+const server = http.createServer(app);
+
+initialiseSocket(server);
+
 connectDB()
   .then(() => {
     console.log("Successfully connected to MongoDB ✅");
 
     const PORT = process.env.PORT || 4000;
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
