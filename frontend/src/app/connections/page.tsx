@@ -21,7 +21,7 @@ export default function Connection() {
   }, []);
 
   const goToChat = (_id: string, photoUrl: string) => {
-    router.push(`/chat/${_id}?targetPhotoUrl=${encodeURIComponent(photoUrl)}`);
+    router.push(`/chat/${_id}`);//?targetPhotoUrl=${encodeURIComponent(photoUrl)}
   };
 
   const renderConnections = () => {
