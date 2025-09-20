@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../../../utils/sockets";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "next/navigation";
 
 interface PageProps {
   params: { id: string };
@@ -13,11 +14,15 @@ interface Message {
   message: string;
   time: string;
   isReceived: boolean;
+  photoUrl?: string;
 }
 
 const ChatSlug: React.FC<PageProps> = ({ params }) => {
   const user = useSelector((state: any) => state.user);
   const targetUserIdRef = useRef<string>("");
+  const searchParams = useSearchParams();
+
+  const targetPhotoUrl =searchParams.get("targetPhotoUrl") || "/default-avatar.png";
 
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -32,6 +37,7 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
         message: data?.message,
         time: new Date().toLocaleTimeString(),
         isReceived: true,
+        // photoUrl: data?.photoUrl || "/default-avatar.png",
       },
     ]);
   };
@@ -45,6 +51,7 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
       message: inputText,
       time: new Date().toLocaleTimeString(),
       isReceived: false,
+      // photoUrl: user?.photoUrl || "/default-avatar.png",
     };
 
     socket?.emit("sendMessage", {
@@ -86,7 +93,12 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
       return (
         <div className="grid pb-6">
           <div className="flex gap-2.5 mb-4">
-            <img src={avatar} alt="Sender" className="w-10 h-10 rounded-full" />
+            {/* <img src={avatar} alt="Sender" className="w-10 h-10 rounded-full" /> */}
+            <img
+              src={targetPhotoUrl}
+              alt="Sender"
+              className="w-10 h-10 rounded-full"
+            />
             <div className="grid">
               <h5 className="text-sm font-semibold pb-1">{msg.firstName}</h5>
               <div className="w-max grid">
@@ -112,23 +124,24 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
             <p className="text-gray-500 text-xs py-1">{msg.time}</p>
           </div>
         </div>
+        {/* <img src={user?.photoUrl || "/default-avatar.png"} alt="You" className="w-10 h-10 rounded-full" /> */}
         <img src={avatar} alt="You" className="w-10 h-10 rounded-full" />
       </div>
     );
   };
 
   return (
-    <div className="mt-4 flex justify-center">
-      <div className="border-4 p-3 rounded-2xl w-1/2">
-        <div className="h-[60vh] overflow-y-auto">
+    <div className="mt-4 flex justify-center px-2">
+      <div className="border-4 p-3 rounded-2xl w-full sm:w-4/5 md:w-2/3 lg:w-1/2">
+        <div className="h-[60vh] sm:h-[65vh] md:h-[70vh] overflow-y-auto">
           {messages.map((msg, idx) => (
             <ChatBubble key={idx} msg={msg} />
           ))}
         </div>
 
-        <div className="flex items-center gap-2 mt-3 border rounded-3xl px-3 py-2">
+        <div className="flex items-center gap-2 mt-3 border rounded-3xl px-2 sm:px-3 py-2">
           <input
-            className="flex-grow text-sm focus:outline-none"
+            className="flex-grow text-sm focus:outline-none min-w-0"
             placeholder="Type a message..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -137,6 +150,7 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
             onClick={handleSendMessage}
             className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-full"
           >
+            {/* send icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -151,7 +165,9 @@ const ChatSlug: React.FC<PageProps> = ({ params }) => {
                 strokeLinecap="round"
               />
             </svg>
-            <span className="ml-2 text-xs font-semibold">Send</span>
+            <span className="ml-2 text-xs font-semibold hidden sm:inline">
+              Send
+            </span>
           </button>
         </div>
       </div>

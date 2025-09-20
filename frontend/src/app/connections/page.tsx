@@ -49,7 +49,7 @@ export default function Connection() {
             </div>
           </div>
           <div>
-            <Link className="btn btn-primary cursor-pointer" href={`/chat/${_id}`}>Chat</Link>
+            <Link className="btn btn-primary cursor-pointer" href={`/chat/${_id}?targetPhotoUrl=${photoUrl}`}>Chat</Link>
           </div>
         </div>
       );
